@@ -3,20 +3,21 @@ import threading
 import time
 import unittest
 from selenium import webdriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from app import create_app, db
 from app.models import Role, User, Post
 
 
 class SeleniumTestCase(unittest.TestCase):
     client = None
-    
+
     @classmethod
     def setUpClass(cls):
         # start Chrome
-        try:
-            cls.client = webdriver.Chrome()
-        except:
-            pass
+        cls.client = webdriver.Remote(
+            desired_capabilities=DesiredCapabilities.CHROME,
+            command_executor="http://localhost:4444"
+        )
 
         # skip these tests if the browser could not be started
         if cls.client:
@@ -48,7 +49,7 @@ class SeleniumTestCase(unittest.TestCase):
             threading.Thread(target=cls.app.run).start()
 
             # give the server a second to ensure it is up
-            time.sleep(1) 
+            time.sleep(1)
 
     @classmethod
     def tearDownClass(cls):
@@ -70,7 +71,7 @@ class SeleniumTestCase(unittest.TestCase):
 
     def tearDown(self):
         pass
-    
+
     def test_admin_home_page(self):
         # navigate to home page
         self.client.get('http://localhost:5000/')
